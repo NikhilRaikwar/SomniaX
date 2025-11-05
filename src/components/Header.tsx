@@ -1,7 +1,9 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
+import { ConnectWallet } from "./ConnectWallet"
 
 export default function Header() {
   const pathname = usePathname()
@@ -17,16 +19,21 @@ export default function Header() {
     <>
       {/* Testnet Banner */}
       <div className="bg-accent text-accent-foreground py-2 text-center text-sm font-bold">
-        🚀 TESTNET ONLY • Built on Somnia • Powered by x402 • Open to All Hackers! 🚀
+        🚀 TESTNET ONLY • Built on Somnia • Powered by x402 🚀
       </div>
       
       <header className="border-b bg-background sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary via-accent to-destructive rounded-lg flex items-center justify-center">
-              <span className="text-2xl font-black text-background">S</span>
-            </div>
-            <span className="font-black text-2xl tracking-tight bg-gradient-to-r from-primary via-accent to-destructive bg-clip-text text-transparent">
+            <Image 
+              src="/somnialogo.png" 
+              alt="Somnia Logo" 
+              width={40} 
+              height={40}
+              className="h-10 w-10"
+              priority
+            />
+            <span className="font-black text-2xl tracking-tight uppercase">
               SOMNIAX
             </span>
           </Link>
@@ -45,7 +52,7 @@ export default function Header() {
             ))}
           </nav>
           
-          <appkit-button />
+          <ConnectWallet />
         </div>
       </header>
     </>

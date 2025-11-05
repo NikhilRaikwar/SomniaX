@@ -28,7 +28,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+
+# local env files
+.env
+.env.local
 
 # vercel
 .vercel
@@ -37,5 +40,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.env.local
-.env
+# turbo
+.turbo
+
+# documentation (keep only main docs)
+LATEST_UPDATES.md
+CHAT_IMPROVEMENTS.md
+RECENT_CHANGES.md
+VALIDATION_EXAMPLES.md
+QUICK_START_SUPABASE.md
+SETUP_COMPLETE.md

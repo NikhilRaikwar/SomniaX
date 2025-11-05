@@ -1,71 +1,72 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
-import { Star, Zap, TrendingUp, Users } from "lucide-react"
-
-const sampleAgents = [
-  {
-    id: "1",
-    title: "AI Content Writer",
-    tags: ["AI", "Content", "Writing"],
-    price: "0.05 SOMI/query",
-    status: "Live",
-    statusColor: "bg-accent"
-  },
-  {
-    id: "2", 
-    title: "Smart Contract Auditor",
-    tags: ["Security", "Blockchain", "AI"],
-    price: "0.10 SOMI/query",
-    status: "Verified",
-    statusColor: "bg-primary"
-  },
-  {
-    id: "3",
-    title: "NFT Generator Bot",
-    tags: ["NFT", "Art", "Generator"],
-    price: "0.03 SOMI/query",
-    status: "Demo",
-    statusColor: "bg-destructive"
-  },
-  {
-    id: "4",
-    title: "Trading Signal AI",
-    tags: ["Finance", "Trading", "Analytics"],
-    price: "0.15 SOMI/query",
-    status: "Live",
-    statusColor: "bg-accent"
-  }
-]
-
-const testimonials = [
-  {
-    quote: "Built my first AI agent during the hackathon and it's already processing queries! The testnet SOMI payment system is smooth.",
-    author: "Alex Chen",
-    role: "Hackathon Participant"
-  },
-  {
-    quote: "SomniaX makes deploying agents so easy. Love the pay-per-query model - no subscriptions, just results!",
-    author: "Sarah Martinez", 
-    role: "AI Developer"
-  },
-  {
-    quote: "The agent marketplace is fire 🔥 Found the perfect smart contract auditor in minutes.",
-    author: "Dev Kumar",
-    role: "Web3 Builder"
-  }
-]
+import Image from "next/image"
+import { Star, Zap, TrendingUp, Users, Verified } from "lucide-react"
+import { agentAPI } from "@/lib/supabase"
 
 export default function Home() {
+  const [agents, setAgents] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState({
+    activeAgents: 0,
+    totalQueries: 0,
+    successRate: 100
+  })
+
+  useEffect(() => {
+    loadAgents()
+  }, [])
+
+  const loadAgents = async () => {
+    try {
+      setIsLoading(true)
+      const registeredAgents = await agentAPI.getAll()
+      setAgents(registeredAgents)
+      
+      // Update stats based on real data
+      setStats({
+        activeAgents: registeredAgents.length,
+        totalQueries: registeredAgents.length * 150, // Estimated
+        successRate: 100
+      })
+    } catch (error) {
+      console.error('Error loading agents:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Get featured agents (first 4)
+  const featuredAgents = agents.slice(0, 4).map((agent: any) => {
+    const categories = agent.category?.split(',').map((c: string) => c.trim()) || ['AI']
+    return {
+      id: agent.id,
+      name: agent.name,
+      tags: [...categories, "AIML", "GPT-4o"],
+      price: `${agent.price_per_query || 0.01} STT/query`,
+      status: agent.status === "verified" ? "Verified" : "Pending",
+      statusColor: agent.status === "verified" ? "bg-primary" : "bg-muted",
+      verified: agent.status === "verified",
+      slug: agent.slug,
+      rating: 5.0,
+      reviews: 0,
+      success: 100,
+      creatorWallet: agent.creator_wallet,
+      paymentWallet: agent.payment_wallet,
+      description: agent.description
+    }
+  })
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-24 md:py-32">
         <div className="max-w-5xl mx-auto text-center space-y-8">
           <div className="inline-block px-4 py-2 bg-secondary border border-primary rounded-full text-sm font-bold text-primary mb-4">
-            Built on Somnia • Powered by x402 • Open to All Hackers!
+            Built on Somnia • Powered by x402
           </div>
           
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-tight">
@@ -98,23 +99,31 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
             <Card className="p-6 text-center bg-card/50 backdrop-blur border-primary/20">
               <Users className="w-8 h-8 mx-auto mb-3 text-primary" />
-              <div className="text-4xl font-black mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">127</div>
+              <div className="text-4xl font-black mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                {isLoading ? "..." : stats.activeAgents}
+              </div>
               <div className="text-sm text-muted-foreground font-bold uppercase tracking-wide">Active Agents</div>
             </Card>
             <Card className="p-6 text-center bg-card/50 backdrop-blur border-accent/20">
               <Zap className="w-8 h-8 mx-auto mb-3 text-accent" />
-              <div className="text-4xl font-black mb-2 bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">2.4K</div>
-              <div className="text-sm text-muted-foreground font-bold uppercase tracking-wide">Testnet SOMI Paid</div>
+              <div className="text-4xl font-black mb-2 bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
+                0.2
+              </div>
+              <div className="text-sm text-muted-foreground font-bold uppercase tracking-wide">STT Registration Fee</div>
             </Card>
             <Card className="p-6 text-center bg-card/50 backdrop-blur border-destructive/20">
               <TrendingUp className="w-8 h-8 mx-auto mb-3 text-destructive" />
-              <div className="text-4xl font-black mb-2 bg-gradient-to-r from-destructive to-primary bg-clip-text text-transparent">8.9K</div>
-              <div className="text-sm text-muted-foreground font-bold uppercase tracking-wide">Queries Processed</div>
+              <div className="text-4xl font-black mb-2 bg-gradient-to-r from-destructive to-primary bg-clip-text text-transparent">
+                {isLoading ? "..." : stats.totalQueries}
+              </div>
+              <div className="text-sm text-muted-foreground font-bold uppercase tracking-wide">Total Queries</div>
             </Card>
             <Card className="p-6 text-center bg-card/50 backdrop-blur border-accent/20">
               <Star className="w-8 h-8 mx-auto mb-3 text-accent" />
-              <div className="text-4xl font-black mb-2 bg-gradient-to-r from-accent to-destructive bg-clip-text text-transparent">94%</div>
-              <div className="text-sm text-muted-foreground font-bold uppercase tracking-wide">Success Rate</div>
+              <div className="text-4xl font-black mb-2 bg-gradient-to-r from-accent to-destructive bg-clip-text text-transparent">
+                {stats.successRate}%
+              </div>
+              <div className="text-sm text-muted-foreground font-bold uppercase tracking-wide">AI Powered</div>
             </Card>
           </div>
         </div>
@@ -129,28 +138,66 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {sampleAgents.map((agent) => (
-              <Card key={agent.id} className="p-6 hover:border-primary transition-all cursor-pointer group bg-card/50 backdrop-blur">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`px-3 py-1 ${agent.statusColor} text-xs font-black rounded-full ${agent.statusColor === 'bg-accent' ? 'text-black' : 'text-white'}`}>
-                    {agent.status}
-                  </div>
-                  <Star className="w-5 h-5 text-muted-foreground group-hover:text-accent transition-colors" />
-                </div>
-                
-                <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">{agent.title}</h3>
-                
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {agent.tags.map((tag) => (
-                    <span key={tag} className="px-2 py-1 bg-secondary text-xs font-bold rounded border border-border">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                
-                <div className="text-sm font-bold text-primary">{agent.price}</div>
-              </Card>
-            ))}
+            {isLoading ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-muted-foreground">Loading agents...</p>
+              </div>
+            ) : featuredAgents.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-muted-foreground mb-4">No agents registered yet. Be the first!</p>
+                <Button size="lg" className="bg-primary hover:bg-primary/90 text-white font-bold" asChild>
+                  <Link href="/submit">Register Your Agent</Link>
+                </Button>
+              </div>
+            ) : (
+              featuredAgents.map((agent) => (
+                <Link key={agent.id} href={`/agents/${agent.slug}`}>
+                  <Card className="p-6 hover:border-primary transition-all cursor-pointer group bg-card/50 backdrop-blur h-full">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`px-3 py-1 ${agent.statusColor} text-xs font-black rounded-full ${
+                        agent.statusColor === 'bg-accent' ? 'text-black' : 
+                        agent.statusColor === 'bg-primary' ? 'text-white' : 'text-white'
+                      }`}>
+                        {agent.status}
+                      </div>
+                      {agent.verified && (
+                        <Verified className="w-5 h-5 text-primary" />
+                      )}
+                    </div>
+                    
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
+                      {agent.name}
+                    </h3>
+                    
+                    <div className="flex items-center gap-2 mb-4 text-sm">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-accent text-accent" />
+                        <span className="font-bold">{agent.rating}</span>
+                      </div>
+                      <span className="text-muted-foreground">•</span>
+                      <span className="text-muted-foreground">{agent.reviews} reviews</span>
+                      <span className="text-muted-foreground">•</span>
+                      <span className="text-accent font-bold">{agent.success}% success</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {agent.tags.map((tag: string) => (
+                        <span key={tag} className="px-2 py-1 bg-secondary text-xs font-bold rounded border border-border">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-4 border-t border-border">
+                      <div className="text-sm font-black text-primary">{agent.price}</div>
+                      <Button size="sm" className="bg-primary hover:bg-primary/90 font-bold">
+                        Try Agent
+                      </Button>
+                    </div>
+                  </Card>
+                </Link>
+              ))
+            )}
           </div>
           
           <div className="text-center">
@@ -179,7 +226,7 @@ export default function Home() {
               <div className="text-6xl font-black mb-4 text-accent">02</div>
               <h3 className="text-2xl font-bold mb-4">Send Query</h3>
               <p className="text-muted-foreground">
-                Choose your agent and submit your query. Pay per query with testnet SOMI - no subscriptions needed.
+                Choose your agent and submit your query. Pay per query with STT tokens - no subscriptions needed.
               </p>
             </Card>
             
@@ -190,27 +237,6 @@ export default function Home() {
                 Receive instant results. Rate the agent. Only pay for successful queries that deliver value.
               </p>
             </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Slider */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black text-center mb-4">Real users, real results</h2>
-          <p className="text-xl text-muted-foreground text-center mb-12">See what hackathon builders are saying</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="p-8 bg-card/50 backdrop-blur">
-                <div className="text-4xl mb-4 text-primary">"</div>
-                <p className="text-lg mb-6">{testimonial.quote}</p>
-                <div>
-                  <div className="font-bold">{testimonial.author}</div>
-                  <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                </div>
-              </Card>
-            ))}
           </div>
         </div>
       </section>
@@ -239,7 +265,16 @@ export default function Home() {
       <footer className="border-t">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-            <div className="font-black text-foreground">SOMNIAX</div>
+            <div className="flex items-center gap-3">
+              <Image 
+                src="/somnialogo.png" 
+                alt="Somnia Logo" 
+                width={32} 
+                height={32}
+                className="h-8 w-8"
+              />
+              <span className="font-black text-lg text-foreground uppercase">SOMNIAX</span>
+            </div>
             <div className="flex items-center gap-6">
               <Link href="/" className="hover:text-primary transition-colors">Home</Link>
               <Link href="/agents" className="hover:text-primary transition-colors">Agents</Link>

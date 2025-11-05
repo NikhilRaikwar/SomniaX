@@ -4,22 +4,39 @@ import VisualEditsMessenger from "../visual-edits/VisualEditsMessenger";
 import ErrorReporter from "@/components/ErrorReporter";
 import Script from "next/script";
 import Header from "@/components/Header";
-import { headers } from 'next/headers'
-import ContextProvider from '@/context'
+import { Toaster } from "@/components/ui/toaster";
+import PrivyProvider from "@/providers/PrivyProvider";
 
 export const metadata: Metadata = {
   title: "SomniaX - Deploy AI Agents",
   description: "Deploy AI Agents. Get Results. Pay Only For Success.",
+  icons: {
+    icon: '/somnialogo.png',
+    shortcut: '/somnialogo.png',
+    apple: '/somnialogo.png',
+    other: {
+      rel: 'icon',
+      url: '/somnialogo.png',
+    },
+  },
+  openGraph: {
+    title: "SomniaX - Deploy AI Agents",
+    description: "Deploy AI Agents. Get Results. Pay Only For Success.",
+    images: ['/somnialogo.png'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "SomniaX - Deploy AI Agents",
+    description: "Deploy AI Agents. Get Results. Pay Only For Success.",
+    images: ['/somnialogo.png'],
+  },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersObj = await headers();
-  const cookies = headersObj.get('cookie')
-
   return (
     <html lang="en">
       <body className="antialiased">
@@ -34,10 +51,11 @@ export default async function RootLayout({
           data-debug="true"
           data-custom-data='{"appName": "YourApp", "version": "1.0.0", "greeting": "hi"}'
         />
-        <ContextProvider cookies={cookies}>
+        <PrivyProvider>
           <Header />
           {children}
-        </ContextProvider>
+          <Toaster />
+        </PrivyProvider>
         <VisualEditsMessenger />
       </body>
     </html>
