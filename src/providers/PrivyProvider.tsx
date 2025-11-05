@@ -25,10 +25,14 @@ export default function PrivyProvider({ children }: { children: React.ReactNode 
         appearance: {
           theme: 'dark',
           accentColor: '#7b3ff2',
-          logo: 'https://somniax.com/icon.png',
+          logo: '/somnialogo.png',
+          landingHeader: 'Welcome to SomniaX',
+          showWalletLoginFirst: true,
         },
         embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
+          ethereum: {
+            createOnLogin: 'users-without-wallets',
+          },
         },
         defaultChain: somniaTestnet,
         supportedChains: [somniaTestnet],
